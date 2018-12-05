@@ -12,7 +12,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ('last_name', 'email')
 
-    object = UserManager()
+    objects = UserManager()
 
     username = models.CharField(max_length=45, unique=True)
     first_name = models.CharField(max_length=45, null=True)

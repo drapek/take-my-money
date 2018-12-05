@@ -1,13 +1,10 @@
-from django.shortcuts import render
-
-# Create your views here.
-from rest_framework import status
+from rest_framework import status, generics
 from rest_framework.generics import UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from users.models import User
-from users.serializers import ChangePasswordSerializer
+from users.serializers import ChangePasswordSerializer, UserDetailsSerializer
 
 
 class ChangePasswordView(UpdateAPIView):
@@ -36,3 +33,14 @@ class ChangePasswordView(UpdateAPIView):
             return Response({"status": "success"}, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserDetails(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Endpoint for getting / updating / deleting User details. Permitted only to the owner.
+    """
+    serializer_class = UserDetailsSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        return User.objects.filter(pk=self.request.user.id)
