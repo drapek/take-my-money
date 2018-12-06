@@ -2,6 +2,7 @@ from django.test import TestCase
 
 from rest_framework.test import APIClient
 
+from core.tests import TestMixin
 from users.models import User
 from django.urls import reverse
 
@@ -45,12 +46,9 @@ class UserAuthenticationTestCase(TestCase):
         self.assertEqual(response.status_code, 401)
 
 
-class UserDetailTestCase(TestCase):
-    def setUp(self):
-        self.api_client = APIClient()
+class UserDetailTestCase(TestCase, TestMixin):
 
-    def test_successful_user_fetch(self):
-        test_user_in_db = {
+    EXAMPLE_TEST_USER = {
             'username': 'test_user',
             'first_name': 'first_name',
             'last_name': 'last_name',
@@ -58,14 +56,25 @@ class UserDetailTestCase(TestCase):
             'iban': 'DE89370400440532013000'
         }
 
-        u = User.objects.create(**test_user_in_db)
+    def setUp(self):
+        self.api_client = APIClient()
 
+    def test_successful_user_fetch(self):
+        u = User.objects.create(**self.EXAMPLE_TEST_USER)
         self.api_client.force_authenticate(user=u)
         response = self.api_client.get(reverse('user-details', kwargs={'pk': u.pk}), format='json')
-
+        self.assertDictKeys(response.data, ('username', 'email', 'first_name', 'last_name', 'iban'))
+        u.delete()
 
     def test_successful_user_update(self):
-        pass
+        u = User.objects.create(**self.EXAMPLE_TEST_USER)
+        data = self.EXAMPLE_TEST_USER
+        data['first_name'] = "Zbyszek"
+        self.api_client.force_authenticate(user=u)
+        response = self.api_client.put(reverse('user-details', kwargs={'pk': u.pk}), data=data, format='json')
+        self.assertEqual(response.data['first_name'], data["first_name"])
+        self.assertEqual(User.objects.get(pk=u.pk).first_name, data['first_name'])
+        u.delete()
 
     def test_successful_user_delete(self):
         pass

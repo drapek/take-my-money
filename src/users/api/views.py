@@ -43,4 +43,4 @@ class UserDetails(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return User.objects.filter(pk=self.request.user.id)
+        return User.objects.filter(pk=self.request.user.id).all()

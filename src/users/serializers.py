@@ -15,7 +15,7 @@ class ChangePasswordSerializer(serializers.Serializer):
     new_password = serializers.CharField(required=True)
 
 
-class UserDetailsSerializer(serializers.Serializer):
+class UserDetailsSerializer(serializers.ModelSerializer):
     """
     Serializer to get user details and update it. It can consist sensitive data.
     """
@@ -24,5 +24,4 @@ class UserDetailsSerializer(serializers.Serializer):
         model = models.User
         fields = ('username', 'first_name', 'last_name', 'email', 'iban')
 
-    def update(self, instance, validated_data):
-        pass
+    # TODO(drapek): Add validator on username to prevent updating it!
