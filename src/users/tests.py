@@ -1,4 +1,6 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.test import TestCase
+from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN, HTTP_400_BAD_REQUEST
 
 from rest_framework.test import APIClient
 
@@ -49,12 +51,20 @@ class UserAuthenticationTestCase(TestCase):
 class UserDetailTestCase(TestCase, TestMixin):
 
     EXAMPLE_TEST_USER = {
-            'username': 'test_user',
-            'first_name': 'first_name',
-            'last_name': 'last_name',
-            'email': 'test@test.test',
-            'iban': 'DE89370400440532013000'
-        }
+        'username': 'test_user',
+        'first_name': 'first_name',
+        'last_name': 'last_name',
+        'email': 'test@test.test',
+        'iban': 'DE89370400440532013000'
+    }
+
+    EXAMPLE_TEST_USER_2 = {
+        'username': 'test_user2',
+        'first_name': 'first_name2',
+        'last_name': 'last_name2',
+        'email': 'test2@test.test',
+        'iban': 'PL61 1090 1014 0000 0712 1981 2874'
+    }
 
     def setUp(self):
         self.api_client = APIClient()
@@ -77,13 +87,48 @@ class UserDetailTestCase(TestCase, TestMixin):
         u.delete()
 
     def test_successful_user_delete(self):
-        pass
+        u = User.objects.create(**self.EXAMPLE_TEST_USER)
+        self.assertTrue(User.objects.get(pk=u.pk))
+        self.api_client.force_authenticate(user=u)
+        response = self.api_client.delete(reverse('user-details', kwargs={'pk': u.pk}))
+        self.assertEqual(response.status_code, HTTP_204_NO_CONTENT)
+        with self.assertRaises(ObjectDoesNotExist):
+            User.objects.get(pk=u.pk)
 
     def test_permissions_for_not_authenticated(self):
-        pass
+        # Try to make action on user data as unauthenticated User
+        u1 = User.objects.create(**self.EXAMPLE_TEST_USER)
+        response = self.api_client.get(reverse('user-details', kwargs={'pk': u1.pk}))
+        self.assertEqual(response.status_code, HTTP_403_FORBIDDEN)
 
-    def test_permissions_for_not_owner(self):
-        pass
+        # Try to make action on user data of another User
+        u2 = User.objects.create(**self.EXAMPLE_TEST_USER_2)
+        self.api_client.force_authenticate(user=u1)
+        response = self.api_client.get(reverse('user-details', kwargs={'pk': u2.pk}))
+        self.assertEqual(response.status_code, HTTP_403_FORBIDDEN)
 
-    def test_iban_update(self):
-        pass
+    def test_successful_iban_update(self):
+        u = User.objects.create(**self.EXAMPLE_TEST_USER)
+        self.api_client.force_authenticate(user=u)
+
+        user_new_iban = self.EXAMPLE_TEST_USER
+        user_new_iban.update({
+            'iban': 'PL61109010140000071219812874'
+        })
+
+        response = self.api_client.put(reverse('user-details', kwargs={'pk': u.pk}), data=user_new_iban, format='json')
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(User.objects.get(pk=u.pk).iban, user_new_iban['iban'])
+
+    def test_invalid_iban_update(self):
+        u = User.objects.create(**self.EXAMPLE_TEST_USER)
+        self.api_client.force_authenticate(user=u)
+
+        user_new_iban = self.EXAMPLE_TEST_USER
+        user_new_iban.update({
+            'iban': 'PL88888888888888888888888888'
+        })
+
+        response = self.api_client.put(reverse('user-details', kwargs={'pk': u.pk}), data=user_new_iban, format='json')
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+        self.assertNotEqual(User.objects.get(pk=u.pk).iban, user_new_iban['iban'])
