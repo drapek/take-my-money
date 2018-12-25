@@ -55,6 +55,12 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             return self.instance.receiver_email
 
 
+class UserListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.User
+        fields = ('username', 'first_name', 'last_name', 'email')
+
+
 class UserInvitationSerializer(serializers.Serializer):
     """
     Serializer for creating user invitation.
@@ -85,7 +91,7 @@ class UserInvitationSerializer(serializers.Serializer):
         invitation_receiver = User.objects.filter(Q(username=validated_data.get('username')) |
                                                   Q(email=validated_data.get('email'))).first()
         if invitation_receiver:
-            pass  # TODO Assign invitation receiver to the Fund
+            pass  # TODO Assign invitation receiver to the Fund. Make sure that this user is not already added.
             # return Fund
         else:
             recipient_email = validated_data.get('email')

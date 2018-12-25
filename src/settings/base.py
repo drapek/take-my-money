@@ -130,3 +130,4 @@ REST_FRAMEWORK = {
 
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', "noreply@localhost")
 FRONTEND_DOMAIN = os.environ.get('FRONTEND_DOMAIN', "localhost")
+PAGE_SIZE = 20

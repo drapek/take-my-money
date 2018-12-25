@@ -8,5 +8,6 @@ urlpatterns = [
     path('<int:pk>/', views.UserDetails.as_view(), name='user-details'),
     path('invite/', views.UserInvitation.as_view(), name='user-invitation'),
     path('registration/<uuid:hash>/', views.UserRegistration.as_view(), name='user-registration'),
-
+    path('search/', views.UserListSearchView.as_view(), name='user-search'),
+    path('search/<str:search_pattern>/', views.UserListSearchView.as_view(), name='user-search-filtered'),
 ]

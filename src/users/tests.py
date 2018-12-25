@@ -7,6 +7,7 @@ from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT, HTTP_403_FOR
 from rest_framework.test import APIClient
 
 from core.mixins import TestMixin
+from settings.base import PAGE_SIZE
 from users.models import User, EmailInvitation
 from django.urls import reverse
 
@@ -189,3 +190,32 @@ class UserInvitationTestCase(TestCase):
         ei = mommy.make(EmailInvitation, host=self.user_2)
         response = self.api_client.post(reverse("user-registration", kwargs={"hash": ei.id}), data=data, format='json')
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+
+
+class UserListTestCase(TestCase):
+    def setUp(self):
+        self.api_client = APIClient()
+        self.user_1 = mommy.make(User)
+        self.api_client.force_authenticate(user=self.user_1)
+
+    def test_full_user_list(self):
+        mommy.make(User, 25)
+        response = self.api_client.get(reverse("user-search"), format='json')
+        self.assertTrue(response.status_code, HTTP_200_OK)
+        self.assertEqual(len(response.data), PAGE_SIZE)  # We limits the results up to 20 records.
+
+    def test_filtered_user_list(self):
+        mommy.make(User, 30)  # Fixture to litter the database.
+        mommy.make(User, first_name="Drapiewski")
+        mommy.make(User, first_name="Drapiewski_1")
+        mommy.make(User, last_name="Drapiewski_2")
+        mommy.make(User, last_name="Drapiewski_3")
+        mommy.make(User, email="Drapiewski_4@test.com")
+        mommy.make(User, email="Drapiewski_5@test.com")
+
+        response = self.api_client.get(reverse("user-search-filtered", kwargs={"search_pattern": "Dr"}), format='json')
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)  # this should be error about too short pattern
+
+        response = self.api_client.get(reverse("user-search-filtered", kwargs={"search_pattern": "Dra"}), format='json')
+        self.assertEqual(response.status_code, HTTP_200_OK)  # this should be error about too short pattern
+        self.assertEqual(len(response.data), 6)  # This are counted expected result from the beggining of this method.
