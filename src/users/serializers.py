@@ -23,5 +23,3 @@ class UserDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
         fields = ('username', 'first_name', 'last_name', 'email', 'iban')
-
-    # TODO(drapek): Add validator on username to prevent updating it!

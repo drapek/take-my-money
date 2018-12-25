@@ -1,5 +1,8 @@
 
 class TestMixin:
+    """
+    This class extends Base TestCase. It adds new method for asserting if key is available in given dict.
+    """
     def assertDictKeys(self, dict, key_list):
         keys_presence_list = [x in dict for x in key_list]
 

@@ -1,10 +1,11 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.test import TestCase
-from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN, HTTP_400_BAD_REQUEST, \
+    HTTP_401_UNAUTHORIZED
 
 from rest_framework.test import APIClient
 
-from core.tests import TestMixin
+from core.mixins import TestMixin
 from users.models import User
 from django.urls import reverse
 
@@ -99,7 +100,7 @@ class UserDetailTestCase(TestCase, TestMixin):
         # Try to make action on user data as unauthenticated User
         u1 = User.objects.create(**self.EXAMPLE_TEST_USER)
         response = self.api_client.get(reverse('user-details', kwargs={'pk': u1.pk}))
-        self.assertEqual(response.status_code, HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, HTTP_401_UNAUTHORIZED)
 
         # Try to make action on user data of another User
         u2 = User.objects.create(**self.EXAMPLE_TEST_USER_2)

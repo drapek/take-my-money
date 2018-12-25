@@ -16,8 +16,16 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 import users.api.urls as users_urls
+import core.tests.urls as core_test_urls
+from settings.base import TESTING
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/users/', include(users_urls))
 ]
+
+
+if TESTING:
+    urlpatterns += [
+        path('', include(core_test_urls)),
+    ]

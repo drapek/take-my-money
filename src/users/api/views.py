@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from users.models import User
+from users.permissions import IsHimself
 from users.serializers import ChangePasswordSerializer, UserDetailsSerializer
 
 
@@ -40,7 +41,7 @@ class UserDetails(generics.RetrieveUpdateDestroyAPIView):
     Endpoint for getting / updating / deleting User details. Permitted only to the owner.
     """
     serializer_class = UserDetailsSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsHimself)
 
     def get_queryset(self):
-        return User.objects.filter(pk=self.request.user.id).all()
+        return User.objects.all()
