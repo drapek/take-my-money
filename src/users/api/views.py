@@ -5,7 +5,8 @@ from rest_framework.response import Response
 
 from users.models import User
 from users.permissions import IsHimself
-from users.serializers import ChangePasswordSerializer, UserDetailsSerializer, UserInvitationSerializer
+from users.serializers import ChangePasswordSerializer, UserDetailsSerializer, UserInvitationSerializer, \
+    UserRegistrationSerializer
 
 
 class ChangePasswordView(UpdateAPIView):
@@ -53,3 +54,7 @@ class UserInvitation(generics.CreateAPIView):
     """
     permission_classes = (IsAuthenticated, )
     serializer_class = UserInvitationSerializer
+
+
+class UserRegistration(generics.CreateAPIView):
+    serializer_class = UserRegistrationSerializer

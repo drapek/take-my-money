@@ -1,3 +1,5 @@
+from django.contrib.auth import password_validation
+from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from rest_framework import serializers
@@ -27,6 +29,30 @@ class UserDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
         fields = ('username', 'first_name', 'last_name', 'email', 'iban')
+
+
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    """
+    Serializer for creating new Users.
+    """
+    password = serializers.CharField(max_length=256, min_length=8)
+    email = serializers.EmailField(required=False)  # If not given than default will be assigned. (form EmailInvitation)
+
+    class Meta:
+        model = models.User
+        fields = ('username', 'first_name', 'last_name', 'email', 'iban', 'password')
+
+    def validate_password(self, value):
+        password_validation.validate_password(value, self.instance)
+        return make_password(value)
+
+    def validate_email(self, value):
+        """
+        If email is not given - assign the one from EmailInvitation
+        """
+        value = super(UserRegistrationSerializer, self).validate_email(self, value)
+        if not value:
+            return self.instance.receiver_email
 
 
 class UserInvitationSerializer(serializers.Serializer):

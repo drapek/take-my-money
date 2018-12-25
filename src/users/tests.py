@@ -163,4 +163,29 @@ class UserInvitationTestCase(TestCase):
         pass  # TODO impelment when Fund model will be done
 
     def test_successful_user_registration_via_url(self):
-        pass
+        self.api_client.force_authenticate(None)  # remove authentication
+        data = {
+            'username': "new_registered_user",
+            'password': "asdasd123%^&",
+            'first_name': "Invited",
+            'last_name': "NewUser",
+            'iban': "PL61109010140000071219812874"
+        }
+
+        ei = mommy.make(EmailInvitation, host=self.user_2)
+        response = self.api_client.post(reverse("user-registration", kwargs={"hash": ei.id}), data=data, format='json')
+        self.assertEqual(response.status_code, HTTP_201_CREATED)
+        self.assertIsNotNone(User.objects.filter(username=data['username']).first())
+
+    def test_to_short_password(self):
+        self.api_client.force_authenticate(None)  # remove authentication
+        data = {
+            'username': "new_registered_user",
+            'password': "1234",
+            'first_name': "Invited",
+            'last_name': "NewUser",
+        }
+
+        ei = mommy.make(EmailInvitation, host=self.user_2)
+        response = self.api_client.post(reverse("user-registration", kwargs={"hash": ei.id}), data=data, format='json')
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
