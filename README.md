@@ -12,3 +12,4 @@ This is backend (API) of this project written in Django2 framework.
 * Make authorization tokens to be expired after X time.
 * Move email sending into celery task
 * User can add own profile photo
+* On User deletion assign "Default User" instead deleting related resources
