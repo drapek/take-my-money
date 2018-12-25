@@ -29,9 +29,9 @@ TESTING = sys.argv[1:2] == ['test']
 
 ALLOWED_HOSTS = []
 
+PORTAL_NAME = "Take my money!"
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -127,3 +127,6 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     )
 }
+
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', "noreply@localhost")
+FRONTEND_DOMAIN = os.environ.get('FRONTEND_DOMAIN', "localhost")

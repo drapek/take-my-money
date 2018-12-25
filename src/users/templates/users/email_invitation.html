@@ -1,0 +1,21 @@
+
+{# TODO Add css style to this email #}
+
+<h1>Hi!</h1>
+
+{% if fund %}
+    <p>
+        You have been invited to participate in fund rising called {{ event_name }}!
+        This request is send by {{ host }}. Please use below url to register and Give Your Money!
+
+        register: <a href="{{ url }}">Click me!</a>
+    </p>
+{% else %}
+    <p>
+        You have been invited to {{ portal_name }}! Portal for rising funds to full fill specified aims (especially for birthday presents).
+        Please use below url to register and start participating.
+
+        register: <a href="{{ url }}">Click me!</a>
+    </p>
+{% endif %}
+

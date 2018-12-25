@@ -14,8 +14,8 @@ class TestIsOwnerPermission(TestCase):
     """
     def setUp(self):
         self.api_client = APIClient()
-        self.permitted_user = mommy.make(User, iban="DE89370400440532013000")
-        self.not_permitted_user = mommy.make(User, iban="PL61109010140000071219812874")
+        self.permitted_user = mommy.make(User)
+        self.not_permitted_user = mommy.make(User)
         self.api_client.force_authenticate(user=self.permitted_user)
 
     def test_no_perms_to_object(self):

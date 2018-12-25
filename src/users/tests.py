@@ -1,12 +1,13 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.test import TestCase
+from model_mommy import mommy
 from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN, HTTP_400_BAD_REQUEST, \
-    HTTP_401_UNAUTHORIZED
+    HTTP_401_UNAUTHORIZED, HTTP_201_CREATED
 
 from rest_framework.test import APIClient
 
 from core.mixins import TestMixin
-from users.models import User
+from users.models import User, EmailInvitation
 from django.urls import reverse
 
 
@@ -133,3 +134,33 @@ class UserDetailTestCase(TestCase, TestMixin):
         response = self.api_client.put(reverse('user-details', kwargs={'pk': u.pk}), data=user_new_iban, format='json')
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
         self.assertNotEqual(User.objects.get(pk=u.pk).iban, user_new_iban['iban'])
+
+
+class UserInvitationTestCase(TestCase):
+
+    def setUp(self):
+        self.api_client = APIClient()
+        self.user_1 = mommy.make(User)
+        self.user_2 = mommy.make(User)
+        self.api_client.force_authenticate(user=self.user_1)
+
+    def test_creation_invitation_email(self):
+        """
+        Test if invitation email is send when we get email at the endpoint that doesn't exists.
+        """
+        data = {
+            'email': "notexistingemail@test.test",
+            # 'fund_id': fund.id   # TODO implement it when Fund model will be done.
+        }
+        response = self.api_client.post(reverse('user-invitation'), data=data, format='json')
+        self.assertEqual(response.status_code, HTTP_201_CREATED)
+        self.assertTrue(EmailInvitation.objects.count(), 1)
+
+    def test_assigning_existing_user(self):
+        """
+        Check if for existing user (email or username exists in DB) we assigned it to proper Fund
+        """
+        pass  # TODO impelment when Fund model will be done
+
+    def test_successful_user_registration_via_url(self):
+        pass

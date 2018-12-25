@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from users.models import User
 from users.permissions import IsHimself
-from users.serializers import ChangePasswordSerializer, UserDetailsSerializer
+from users.serializers import ChangePasswordSerializer, UserDetailsSerializer, UserInvitationSerializer
 
 
 class ChangePasswordView(UpdateAPIView):
@@ -45,3 +45,11 @@ class UserDetails(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return User.objects.all()
+
+
+class UserInvitation(generics.CreateAPIView):
+    """
+    Try to find user by username or email. If not exists it will send invitation via email.
+    """
+    permission_classes = (IsAuthenticated, )
+    serializer_class = UserInvitationSerializer
