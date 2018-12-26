@@ -13,6 +13,7 @@ from localflavor.generic.countries.sepa import IBAN_SEPA_COUNTRIES
 from localflavor.generic.models import IBANField
 from rest_framework.authtoken.models import Token
 
+from funds.models import Fund
 from settings.base import DEFAULT_FROM_EMAIL
 from settings.base import FRONTEND_DOMAIN
 from settings.base import PORTAL_NAME
@@ -47,17 +48,22 @@ class EmailInvitation(models.Model):
     date = models.DateTimeField(auto_now=True, null=False)
     recipient_email = models.EmailField()
     is_used = models.BooleanField(default=False)
-    # TODO uncomment when Fund model will be done.
-    # related_fund = models.ForeignKey(Fund, on_delete=SET_NULL, null=True)
+    related_fund = models.ForeignKey(Fund, on_delete=SET_NULL, null=True)
+
+    @property
+    def get_fund_name(self):
+        if self.related_fund:
+            return self.related_fund.name
+        else:
+            "-"
 
     def send_email_invitation(self):
         send_mail(
-            # TODO change EVENT_NAME on proper name when Fund model will be done.
-            subject=f'{PORTAL_NAME} - Invitation to participate in EVENT_NAME.',
-            message=render_to_string('users/email_invitation.html', {'event_name': "EVENT_NAME",
+            subject=f'{PORTAL_NAME} - Invitation to participate in {self.get_fund_name}.',
+            message=render_to_string('users/email_invitation.html', {'event_name': f"{self.get_fund_name}",
                                                                      'portal_name': PORTAL_NAME,
                                                                      'host': self.host.username,
-                                                                     'fund': None,  # TODO assign Fund.
+                                                                     'fund': self.related_fund,
                                                                      'url': f'{FRONTEND_DOMAIN}/register/{self.id}'
                                                                      }),
             from_email=f'{DEFAULT_FROM_EMAIL}',

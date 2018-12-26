@@ -7,6 +7,7 @@ from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT, HTTP_403_FOR
 from rest_framework.test import APIClient
 
 from core.mixins import TestMixin
+from funds.models import Fund, Participation
 from settings.base import PAGE_SIZE
 from users.models import User, EmailInvitation
 from django.urls import reverse
@@ -149,9 +150,12 @@ class UserInvitationTestCase(TestCase):
         """
         Test if invitation email is send when we get email at the endpoint that doesn't exists.
         """
+        fund = mommy.make(Fund)
+        Participation.objects.create(user=self.user_1, is_owner=True, fund=fund)
+
         data = {
             'email': "notexistingemail@test.test",
-            # 'fund_id': fund.id   # TODO implement it when Fund model will be done.
+            # 'fund_id': fund.id  # TODO implement it.
         }
         response = self.api_client.post(reverse('user-invitation'), data=data, format='json')
         self.assertEqual(response.status_code, HTTP_201_CREATED)
@@ -161,7 +165,10 @@ class UserInvitationTestCase(TestCase):
         """
         Check if for existing user (email or username exists in DB) we assigned it to proper Fund
         """
-        pass  # TODO impelment when Fund model will be done
+        pass  # TODO implement when Fund model will be done
+
+    def test_already_used_invitation(self):
+        pass  # TODO implement it
 
     def test_successful_user_registration_via_url(self):
         self.api_client.force_authenticate(None)  # remove authentication

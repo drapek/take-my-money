@@ -1,8 +1,5 @@
 from django.db import models
-from django.db.models import SET_NULL
 from djmoney.models.fields import MoneyField
-
-from users.models import User
 
 
 class Fund(models.Model):
@@ -24,12 +21,17 @@ class Fund(models.Model):
         max_digits=10
     )
     state = models.IntegerField(choices=FUND_STATE, default=0)
-    participants = models.ManyToManyField(User, through='Participation')
+    participants = models.ManyToManyField('users.User', through='Participation')
+
+    @property
+    def get_owner(self):
+        return self.participants.filter(participation__is_owner=True).first()
 
 
 class Participation(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE)
     fund = models.ForeignKey(Fund, on_delete=models.CASCADE)
+    is_owner = models.BooleanField(default=False)
     is_enrolled = models.BooleanField(default=False)
     is_payed = models.BooleanField(default=False)
     # user_payments = # TODO implement when Payment model will be done. There can be many payments made by one User.
