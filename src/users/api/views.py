@@ -1,7 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db.models import Q
-from django.http import HttpResponseBadRequest, Http404, JsonResponse
-from faker.providers.date_time import ParseError
+from django.http import JsonResponse
 from rest_framework import status, generics
 from rest_framework.generics import UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
