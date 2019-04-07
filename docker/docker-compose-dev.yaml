@@ -1,0 +1,27 @@
+# This is docker compose for develop environment
+
+version: '3'
+
+services:
+  db:
+    image: postgres
+  web:
+    tty: true
+    environment:
+      - DJANGO_SETTINGS_MODULE=settings.develop
+    build: 
+      context: ../
+      dockerfile: docker/Dockerfile-web
+      args:
+        REQUIREMENTS_FILE: /code/requirements-dev.txt
+
+    command: bash -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000 || echo nooooo && bash"
+    volumes:
+      - ../:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+
