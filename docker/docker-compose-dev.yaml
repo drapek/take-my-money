@@ -11,7 +11,7 @@ services:
       - DJANGO_SETTINGS_MODULE=settings.develop
     build: 
       context: ../
-      dockerfile: docker/Dockerfile-web
+      dockerfile: Dockerfile.web
       args:
         REQUIREMENTS_FILE: /code/requirements-dev.txt
 
